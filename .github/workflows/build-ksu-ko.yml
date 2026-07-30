@@ -31,24 +31,22 @@ jobs:
       - name: Patch KernelSU and Configure
         run: |
           export PATH=$PWD/toolchain/bin:$PATH
-          
-          # Entra na pasta do kernel e executa o setup do KernelSU apontando para o diretório atual (.)
           cd kernel
           ../KernelSU/kernel/setup.sh .
-          
-          make ARCH=arm64 LLVM=1 LLVM_IAS=1 defconfig
+          make ARCH=arm64 LLVM=1 LLVM_IAS=1 gki_defconfig
           echo "CONFIG_KSU=m" >> .config
           make ARCH=arm64 LLVM=1 LLVM_IAS=1 olddefconfig
           make ARCH=arm64 LLVM=1 LLVM_IAS=1 modules_prepare
 
-      - name: Build Kernel Modules
+      - name: Build KernelSU Module Only
         run: |
           export PATH=$PWD/toolchain/bin:$PATH
           cd kernel
-          make ARCH=arm64 LLVM=1 LLVM_IAS=1 modules
+          make ARCH=arm64 LLVM=1 LLVM_IAS=1 M=drivers/kernelsu modules
 
       - name: Upload KernelSU .ko Artifact
         uses: actions/upload-artifact@v4
         with:
           name: kernelsu-module
           path: kernel/drivers/kernelsu/*.ko
+          if-no-files-found: error

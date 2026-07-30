@@ -36,7 +36,6 @@ jobs:
           
           cp ../kernel_config .config
           
-          # Força módulos, KSU e as dependências obrigatórias de KProbes
           echo "CONFIG_MODULES=y" >> .config
           echo "CONFIG_KSU=m" >> .config
           echo "CONFIG_KPROBES=y" >> .config
@@ -45,10 +44,8 @@ jobs:
           
           make ARCH=arm64 LLVM=1 LLVM_IAS=1 olddefconfig
           
-          echo "=== DIAGNÓSTICO DO CONFIG ==="
-          grep -E "CONFIG_KSU|CONFIG_KPROBES|CONFIG_MODULES" .config
-          
-          make ARCH=arm64 LLVM=1 LLVM_IAS=1 prepare
+          # Compila os módulos para gerar o Module.symvers obrigatoriamente
+          make ARCH=arm64 LLVM=1 LLVM_IAS=1 modules
 
       - name: Build KernelSU Module Only
         run: |

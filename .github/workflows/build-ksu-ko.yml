@@ -25,13 +25,16 @@ jobs:
 
       - name: Clone Android Common Kernel & KernelSU
         run: |
-          git clone --depth=1 -b common-android13-5.15 https://android.googlesource.com/kernel/common kernel
+          git clone --depth=1 -b android13-5.15 https://android.googlesource.com/kernel/common kernel
           git clone --depth=1 https://github.com/tiann/KernelSU
 
       - name: Patch KernelSU and Configure
         run: |
           export PATH=$PWD/toolchain/bin:$PATH
-          bash KernelSU/kernel/setup.sh kernel
+          
+          # Usa caminho absoluto para o setup.sh encontrar a pasta drivers/ sem erro
+          bash KernelSU/kernel/setup.sh $PWD/kernel
+          
           cd kernel
           make ARCH=arm64 LLVM=1 LLVM_IAS=1 defconfig
           echo "CONFIG_KSU=m" >> .config

@@ -41,11 +41,12 @@ jobs:
           echo "CONFIG_KPROBES=y" >> .config
           echo "CONFIG_HAVE_KPROBES=y" >> .config
           echo "CONFIG_KPROBE_EVENTS=y" >> .config
+          echo "# CONFIG_ZRAM is not set" >> .config
           
           make ARCH=arm64 LLVM=1 LLVM_IAS=1 olddefconfig
           
-          # Compila os módulos para gerar o Module.symvers obrigatoriamente
-          make ARCH=arm64 LLVM=1 LLVM_IAS=1 modules
+          # Gera o Module.symvers e headers necessários para módulos externos sem compilar drivers
+          make ARCH=arm64 LLVM=1 LLVM_IAS=1 modules_prepare
 
       - name: Build KernelSU Module Only
         run: |

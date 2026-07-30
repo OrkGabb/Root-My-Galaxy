@@ -17,24 +17,26 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y bc bison flex libssl-dev libelf-dev build-essential git
 
-      - name: Download Clang 14.0.6 Toolchain
+      - name: Download Clang Toolchain
         run: |
           mkdir -p toolchain
           wget -q https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/android13-release/clang-r450784d.tar.gz
           tar -xzf clang-r450784d.tar.gz -C toolchain
 
-      - name: Clone Android Common Kernel & KernelSU
+      - name: Clone Exynos 1380 Kernel Source & KernelSU
         run: |
-          git clone --depth=1 -b android13-5.15 https://android.googlesource.com/kernel/common kernel
+          git clone --depth=1 https://github.com/daglaroglou/android_kernel_samsung_a54x kernel
           git clone --depth=1 https://github.com/tiann/KernelSU
 
-      - name: Patch KernelSU and Configure
+      - name: Patch KernelSU and Configure with Real Config
         run: |
           export PATH=$PWD/toolchain/bin:$PATH
           cd kernel
           ../KernelSU/kernel/setup.sh .
           
+          # Copia o config exato do M54 para a árvore unificada da Exynos 1380
           cp ../kernel_config .config
+          
           echo "CONFIG_MODULES=y" >> .config
           echo "CONFIG_KSU=m" >> .config
           

@@ -1,0 +1,51 @@
+name: Build KernelSU Module (.ko)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bc bison flex libssl-dev libelf-dev build-essential git
+
+      - name: Download Clang 14.0.6 Toolchain
+        run: |
+          mkdir -p toolchain
+          wget -q https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/android13-release/clang-r450784d.tar.gz
+          tar -xzf clang-r450784d.tar.gz -C toolchain
+
+      - name: Clone Android Common Kernel (android13-5.15)
+        run: |
+          git clone --depth=1 -b android13-5.15 https://android.googlesource.com/kernel/common kernel
+
+      - name: Clone KernelSU
+        run: |
+          git clone --depth=1 https://github.com/tiann/KernelSU kernel/drivers/kernelsu
+
+      - name: Prepare Kernel Headers & Module Symbols
+        run: |
+          export PATH=$PWD/toolchain/bin:$PATH
+          cd kernel
+          make ARCH=arm64 LLVM=1 LLVM_IAS=1 defconfig
+          # Habilita o suporte ao KernelSU no config do kernel de testes
+          echo "CONFIG_KSU=m" >> arch/arm64/configs/gki_defconfig
+          make ARCH=arm64 LLVM=1 LLVM_IAS=1 defconfig
+          make ARCH=arm64 LLVM=1 LLVM_IAS=1 modules_prepare
+
+      - name: Build KernelSU Module
+        run: |
+          export PATH=$PWD/toolchain/bin:$PATH
+          make -C kernel M=$PWD/kernel/drivers/kernelsu ARCH=arm64 LLVM=1 LLVM_IAS=1 modules
+
+      - name: Organize and Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kernelsu-ko-m54
+          path: kernel/drivers/kernelsu/*.ko

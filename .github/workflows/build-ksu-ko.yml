@@ -1,4 +1,4 @@
-name: Build KernelSU Integrated LKM
+name: Build Full Kernel & KernelSU LKM
 
 on:
   workflow_dispatch:
@@ -15,7 +15,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y bc bison flex libssl-dev libelf-dev build-essential git
+          sudo apt-get install -y bc bison flex libssl-dev libelf-dev build-essential git ccache
 
       - name: Download Clang Toolchain
         run: |
@@ -28,7 +28,7 @@ jobs:
           git clone --depth=1 https://github.com/daglaroglou/android_kernel_samsung_a54x kernel
           git clone --depth=1 https://github.com/tiann/KernelSU
 
-      - name: Patch KernelSU and Configure
+      - name: Configure Kernel & Setup KernelSU
         run: |
           export PATH=$PWD/toolchain/bin:$PATH
           cd kernel
@@ -41,17 +41,16 @@ jobs:
           echo "CONFIG_KPROBES=y" >> .config
           echo "CONFIG_HAVE_KPROBES=y" >> .config
           echo "CONFIG_KPROBE_EVENTS=y" >> .config
-          echo "# CONFIG_ZRAM is not set" >> .config
           
           make ARCH=arm64 LLVM=1 LLVM_IAS=1 olddefconfig
 
-      - name: Generate Module.symvers by Building Modules
+      - name: Full Kernel Build (Generate vmlinux & Module.symvers)
         run: |
           export PATH=$PWD/toolchain/bin:$PATH
           cd kernel
-          make ARCH=arm64 LLVM=1 LLVM_IAS=1 modules -j$(nproc)
+          make ARCH=arm64 LLVM=1 LLVM_IAS=1 -j$(nproc)
 
-      - name: Build KernelSU Module Only
+      - name: Build KernelSU Module Explicitly
         run: |
           export PATH=$PWD/toolchain/bin:$PATH
           cd kernel

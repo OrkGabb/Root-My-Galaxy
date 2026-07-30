@@ -28,13 +28,18 @@ jobs:
           git clone --depth=1 -b android13-5.15 https://android.googlesource.com/kernel/common kernel
           git clone --depth=1 https://github.com/tiann/KernelSU
 
-      - name: Patch KernelSU and Configure
+      - name: Patch KernelSU and Configure with Real Config
         run: |
           export PATH=$PWD/toolchain/bin:$PATH
           cd kernel
           ../KernelSU/kernel/setup.sh .
-          make ARCH=arm64 LLVM=1 LLVM_IAS=1 gki_defconfig
+          
+          # Copia o config exato do M54 para a árvore do kernel
+          cp ../kernel_config .config
+          
+          # Garante o KSU ativo como módulo
           echo "CONFIG_KSU=m" >> .config
+          
           make ARCH=arm64 LLVM=1 LLVM_IAS=1 olddefconfig
           make ARCH=arm64 LLVM=1 LLVM_IAS=1 modules_prepare
 

@@ -34,13 +34,20 @@ jobs:
           cd kernel
           ../KernelSU/kernel/setup.sh .
           
-          # Copia o config exato do M54 para a árvore unificada da Exynos 1380
           cp ../kernel_config .config
           
+          # Força módulos, KSU e as dependências obrigatórias de KProbes
           echo "CONFIG_MODULES=y" >> .config
           echo "CONFIG_KSU=m" >> .config
+          echo "CONFIG_KPROBES=y" >> .config
+          echo "CONFIG_HAVE_KPROBES=y" >> .config
+          echo "CONFIG_KPROBE_EVENTS=y" >> .config
           
           make ARCH=arm64 LLVM=1 LLVM_IAS=1 olddefconfig
+          
+          echo "=== DIAGNÓSTICO DO CONFIG ==="
+          grep -E "CONFIG_KSU|CONFIG_KPROBES|CONFIG_MODULES" .config
+          
           make ARCH=arm64 LLVM=1 LLVM_IAS=1 prepare
 
       - name: Build KernelSU Module Only

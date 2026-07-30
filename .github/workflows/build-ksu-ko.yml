@@ -32,11 +32,10 @@ jobs:
         run: |
           export PATH=$PWD/toolchain/bin:$PATH
           
-          # Copia os fontes diretamente para a árvore de drivers do kernel
-          mkdir -p kernel/drivers/kernelsu
-          cp -r KernelSU/kernel/* kernel/drivers/kernelsu/
-          
+          # Entra na pasta do kernel e executa o setup do KernelSU apontando para o diretório atual (.)
           cd kernel
+          ../KernelSU/kernel/setup.sh .
+          
           make ARCH=arm64 LLVM=1 LLVM_IAS=1 defconfig
           echo "CONFIG_KSU=m" >> .config
           make ARCH=arm64 LLVM=1 LLVM_IAS=1 olddefconfig

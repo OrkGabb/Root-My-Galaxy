@@ -32,8 +32,9 @@ jobs:
         run: |
           export PATH=$PWD/toolchain/bin:$PATH
           
-          # Usa caminho absoluto para o setup.sh encontrar a pasta drivers/ sem erro
-          bash KernelSU/kernel/setup.sh $PWD/kernel
+          # Copia os fontes diretamente para a árvore de drivers do kernel
+          mkdir -p kernel/drivers/kernelsu
+          cp -r KernelSU/kernel/* kernel/drivers/kernelsu/
           
           cd kernel
           make ARCH=arm64 LLVM=1 LLVM_IAS=1 defconfig

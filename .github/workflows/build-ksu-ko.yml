@@ -35,7 +35,9 @@ jobs:
           ../KernelSU/kernel/setup.sh .
           
           cp ../kernel_config .config
+          echo "CONFIG_MODULES=y" >> .config
           echo "CONFIG_KSU=m" >> .config
+          
           make ARCH=arm64 LLVM=1 LLVM_IAS=1 olddefconfig
           make ARCH=arm64 LLVM=1 LLVM_IAS=1 prepare
 

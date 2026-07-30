@@ -1,7 +1,9 @@
-name: Build KernelSU Module (.ko)
+name: Build KernelSU LKM
 
 on:
   workflow_dispatch:
+  push:
+    branches: [ main ]
 
 jobs:
   build:
@@ -29,12 +31,11 @@ jobs:
         run: |
           git clone --depth=1 https://github.com/tiann/KernelSU kernel/drivers/kernelsu
 
-      - name: Prepare Kernel Headers & Module Symbols
+      - name: Prepare Kernel Headers & KMI
         run: |
           export PATH=$PWD/toolchain/bin:$PATH
           cd kernel
           make ARCH=arm64 LLVM=1 LLVM_IAS=1 defconfig
-          # Habilita o suporte ao KernelSU no config do kernel de testes
           echo "CONFIG_KSU=m" >> arch/arm64/configs/gki_defconfig
           make ARCH=arm64 LLVM=1 LLVM_IAS=1 defconfig
           make ARCH=arm64 LLVM=1 LLVM_IAS=1 modules_prepare
@@ -44,8 +45,8 @@ jobs:
           export PATH=$PWD/toolchain/bin:$PATH
           make -C kernel M=$PWD/kernel/drivers/kernelsu ARCH=arm64 LLVM=1 LLVM_IAS=1 modules
 
-      - name: Organize and Upload Artifact
+      - name: Upload Kernelsu .ko Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: kernelsu-ko-m54
+          name: kernelsu-module
           path: kernel/drivers/kernelsu/*.ko

@@ -31,9 +31,11 @@ jobs:
       - name: Patch KernelSU and Configure
         run: |
           export PATH=$PWD/toolchain/bin:$PATH
-          cd KernelSU
-          bash kernel/setup.sh ../kernel
-          cd ../kernel
+          
+          # Executa o setup a partir da raiz, apontando para a pasta kernel correta
+          bash KernelSU/kernel/setup.sh kernel
+          
+          cd kernel
           make ARCH=arm64 LLVM=1 LLVM_IAS=1 defconfig
           echo "CONFIG_KSU=m" >> .config
           make ARCH=arm64 LLVM=1 LLVM_IAS=1 olddefconfig

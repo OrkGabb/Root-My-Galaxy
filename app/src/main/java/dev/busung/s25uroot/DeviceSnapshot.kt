@@ -9,7 +9,6 @@ data class DeviceSnapshot(
     val model: String,
     val device: String,
     val kernelRelease: String,
-    val kernelBuildVersion: String,
     val buildId: String,
     val fingerprint: String,
     val androidRelease: String,
@@ -20,6 +19,9 @@ data class DeviceSnapshot(
     val targetLabel: String
         get() = "$kernelRelease / $buildId"
 
+    val kernelVersion: String
+        get() = kernelRelease.takeWhile { it.isDigit() || it == '.' }
+
     companion object {
         fun current(): DeviceSnapshot {
             val uname = Os.uname()
@@ -28,7 +30,6 @@ data class DeviceSnapshot(
                 model = Build.MODEL,
                 device = Build.DEVICE,
                 kernelRelease = uname.release,
-                kernelBuildVersion = uname.version,
                 buildId = Build.DISPLAY,
                 fingerprint = Build.FINGERPRINT,
                 androidRelease = Build.VERSION.RELEASE,
